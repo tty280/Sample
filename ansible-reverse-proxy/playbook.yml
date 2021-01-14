@@ -1,0 +1,66 @@
+---
+- hosts: all
+  become: True
+  tasks:
+    - include: tasks/deps.yml
+    
+    - name: Enable EPEL Repository
+      yum:
+        name: epel-release
+        state: present
+      become: True
+
+    - name: Install nginx
+      yum:
+        name: nginx
+        state: present
+
+    - name: Create ssl directory
+      file:
+        path: /etc/nginx/ssl
+        state: directory
+    
+    - name: Create app directory
+      file:
+        path: /opt/app
+        state: directory
+
+    - name: Copy app files
+      copy: 
+        src: app/
+        dest: /opt/app
+      
+    - name: Create systemd unit file content for run bash script
+      copy:
+        dest: /etc/systemd/system/app-py.service
+        owner: root
+        group: root
+        content: |
+          [Unit]
+          Description=App python service
+          [Service]
+          ExecStart=/opt/app/run
+          [Install]
+          WantedBy=multi-user.target
+    
+    - name: Start app-py
+      systemd:
+        name: app-py
+        state: started
+        enabled: yes
+
+    - name: Copy nginx config file
+      copy: 
+        src: config/nginx.conf
+        dest: /etc/nginx/nginx.conf
+        
+    - name: Copy ssl certificates
+      copy: 
+        src: ssl/
+        dest: /etc/nginx/ssl
+        
+    - name: Start nginx
+      service:
+        name: nginx
+        state: started 
+      become: yes

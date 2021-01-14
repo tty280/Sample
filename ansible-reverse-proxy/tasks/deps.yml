@@ -1,0 +1,11 @@
+---
+- name: install required dependencies
+  yum:
+    name: ['unzip', 'libselinux-python', 'libsemanage-python', 'openssl'] 
+    state: present
+
+- name: enable httpd connect to network
+  seboolean:
+    name: httpd_can_network_connect
+    state: yes
+    persistent: yes

@@ -1,0 +1,17 @@
+version: "3"
+services:
+  app:
+    container_name: app
+    image: app:latest
+    ports:
+        - 5000:5000
+    restart: always
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    ports:
+        - 80:80
+        - 443:443
+    volumes:
+        - ./nginx/ssl/:/etc/nginx/ssl
+    restart: always
